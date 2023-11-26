@@ -1,3 +1,4 @@
+/* eslint-disable import/no-anonymous-default-export */
 import React, { useState, useEffect } from "react";
 import {
   Row,
@@ -123,20 +124,29 @@ export default props => {
       setReservationError(true);
     } else {
       const datetime = getDate();
-      let res = await fetch("http://localhost:3005/reserve", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          ...booking,
-          date: datetime,
-          table: selection.table.id
-        })
-      });
-      res = await res.text();
-      console.log("Reserved: " + res);
-      props.setPage(2);
+      try {
+        // Send reservation data to the server
+        const res = await fetch("http://localhost:3005/api/reserve", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            ...booking,
+            date: datetime,
+            table: selection.table.id
+          })
+        });
+
+        if (res.ok) {
+          console.log("Reservation successful");
+          props.setPage(2);
+        } else {
+          console.error("Reservation failed");
+        }
+      } catch (error) {
+        console.error("Error processing reservation:", error);
+      }
     }
   };
 
